@@ -62,6 +62,29 @@ def get_intervals(
 
 
 def cli():
+    """
+    Entry point that exposes the program's CLI.
+
+    This function delegates execution to typer.run(main), turning the
+    callable `main` into a Typer/Click-based command-line interface and
+    running it with the current process arguments (sys.argv). It accepts
+    no parameters and does not return a value; its primary effect is to
+    start and manage the CLI lifecycle, including argument parsing,
+    dispatching to the `main` function, and propagating CLI-related
+    exceptions or exit codes.
+
+    Notes:
+    - The referenced `main` callable must be defined in the same module
+        and be compatible with Typer (i.e., it may accept typed function
+        parameters that map to CLI options/arguments).
+    - Typical usage is to call this function from a module guard:
+            if __name__ == "__main__":
+                    cli()
+    - Any SystemExit or exceptions raised by the CLI or `main` will
+        behave as they do under Typer/Click (may terminate the process).
+
+    No return value.
+    """
     typer.run(main)
 
 
