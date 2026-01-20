@@ -20,3 +20,7 @@ data/**
 *.sam
 *.bam
 *.bowtie
+
+# Output directories
+output/
+results/

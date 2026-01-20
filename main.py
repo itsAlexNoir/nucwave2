@@ -132,22 +132,79 @@ def main(
     log.info("#" * 45)
 
     if write_intermediate_files:
+        log.info("Writing intermediate files: fragment size histogram")
         time0 = int(time.time())
-    log.info("Writing intermediate files: fragment size histogram")
-    filename = output_dir / "readsize_histogram.wig"
-    sizereads.with_row_index().write_csv(filename, include_header=False)
-    log.info("  Time taken: %d seconds" % (time.time() - time0))
+        filename = output_dir / "readsize_histogram.wig"
+        sizereads.with_row_index().write_csv(filename, include_header=False)
+        log.info("\tTime taken: %d seconds" % (time.time() - time0))
 
     log.info("#" * 45)
+    if write_intermediate_files:
+        log.info("Writing intermediate files: cut points per strand")
+        time0 = int(time.time())
+        filename = output_dir / "cut_p.wig"
+        with open(filename, "w") as WIG:
+            for chrid, hist in histograms.items():
+                WIG.write(
+                    f"track type=wiggle_0 name={filename} description={filename.stem}\n"
+                )
+                WIG.write(f"fixedStep chrom={chrid} start=1 step=1\n")
+                for row in hist.select("starts").collect().iter_rows():
+                    WIG.write(f"{row[0]}\n")
 
-    # suffix = 'cut_p'
-    # WIG = open(WIG_file + "_%s.wig" % suffix,"w")
-    # for chrid in chrseq.keys() :
-    #     WIG.write('track type=wiggle_0 name=%s_%s description="%s_%s"\n' % (exper,suffix,exper,suffix))
-    #     WIG.write('fixedStep chrom=%s start=1 step=1\n' % chrid)
-    # for i in range(chrlen[chrid]) :
-    #   WIG.write('%d\n' % iniciosPE[chrid][i] )
-    # WIG.close()
+        filename = output_dir / "cut_m.wig"
+        with open(filename, "w") as WIG:
+            for chrid, hist in histograms.items():
+                WIG.write(
+                    f"track type=wiggle_0 name={filename} description={filename.stem}\n"
+                )
+                WIG.write(f"fixedStep chrom={chrid} start=1 step=1\n")
+                for row in hist.select("ends").collect().iter_rows():
+                    WIG.write(f"{row[0]}\n")
+        time1 = int(time.time())
+        log.info("\tTime taken: %d seconds" % (time1 - time0))
+
+        log.info("#" * 45)
+
+        log.info("Writing intermediate files: PE center count")
+        time0 = int(time.time())
+        filename = output_dir / "depth_trimmed_PE.wig"
+        with open(filename, "w") as WIG:
+            for chrid, hist in histograms.items():
+                WIG.write(
+                    f"track type=wiggle_0 name={filename} description={filename.stem}\n"
+                )
+                WIG.write(f"fixedStep chrom={chrid} start=1 step=1\n")
+                for row in hist.select("centers").collect().iter_rows():
+                    WIG.write(f"{row[0]}\n")
+
+        time1 = int(time.time())
+        log.info("\tTime taken: %d seconds" % (time1 - time0))
+        log.info("#" * 45)
+
+        log.info("Writing intermediate files: depth coverage for complete PE reads")
+        time0 = int(time.time())
+        filename = output_dir / "depth_complete_PE.wig"
+        with open(filename, "w") as WIG:
+            for chrid, hist in histograms.items():
+                WIG.write(
+                    f'track type=wiggle_0 name={filename} description="{filename.stem}"\n'
+                )
+                WIG.write(f"fixedStep chrom={chrid} start=1 step=1\n")
+                deep = 0
+                for row in (
+                    hist.select(pl.col("starts") - pl.col("ends")).collect().iter_rows()
+                ):
+                    deep += row[0]
+                    WIG.write(f"{deep}\n")
+        time1 = int(time.time())
+        log.info("\tTime taken: %d seconds" % (time1 - time0))
+
+        log.info("#" * 45)
+
+        log.info("#" * 45)
+
+        log.info("Calculation completed successfully.")
 
 
 if __name__ == "__main__":
