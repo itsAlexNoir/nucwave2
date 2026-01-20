@@ -56,7 +56,6 @@ def get_intervals(
             )
 
     sizereads = intervals.select(pl.col("d2d_long").hist(bin_count=maxsize)).collect()
-    print("Here")
 
     return num_filtered_samples, sizereads, histograms
 
