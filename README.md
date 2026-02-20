@@ -49,6 +49,38 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e .
 ```
 
+## Scripts
+
+### main.py
+The primary analysis script that processes Bowtie alignment files and genome FASTA files to generate fragment size histograms and genomic position distributions.
+
+### extract_NDRs.py
+Detects Nucleosome-Depleted Regions (NDRs) from WIG files. Parses WIG format files (both fixedStep and variableStep formats) and identifies regions above a specified threshold, outputting results as a BED file.
+
+**Usage:**
+```bash
+uv run python extract_NDRs.py <wig_file> <output_directory>
+```
+
+**Parameters:**
+- `wig_file`: Path to the input WIG file
+- `output_directory`: Directory where the NDR BED file will be written
+
+### filter_bedfiles.py
+Filters BED intervals by length, keeping only intervals longer than a minimum threshold. Useful for removing short or spurious regions from BED files.
+
+**Usage:**
+```bash
+uv run python filter_bedfiles.py <bed_file> [--min-len INT]
+```
+
+**Parameters:**
+- `bed_file`: Path to the input BED file (3-column format: chr, start, end)
+- `--min-len`: Minimum interval length to keep (default: 10)
+
+**Output:**
+Creates a filtered BED file with the suffix `.filtered.bed`
+
 ## Usage
 
 Run the main script with:
